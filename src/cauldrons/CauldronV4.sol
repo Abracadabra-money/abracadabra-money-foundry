@@ -55,7 +55,6 @@ contract CauldronV4 is BoringOwnable, IMasterContract {
     event LogChangeBlacklistedCallee(address indexed account, bool blacklisted);
     event LogRepayForAll(uint256 amount, uint128 previousElastic, uint128 newElastic);
     event LogChangeUserSafeCollaterizationRate(uint256 collaterizationRate);
-    event LogChangeSafeCollaterizationFee(uint256 feeBps);
 
     event LogLiquidation(
         address indexed from,
@@ -66,6 +65,15 @@ contract CauldronV4 is BoringOwnable, IMasterContract {
         uint256 borrowPart
     );
 
+    event LogSafeLiquidation(
+        address indexed from,
+        address indexed user,
+        address indexed to,
+        uint256 collateralShare,
+        uint256 borrowAmount,
+        uint256 borrowPart
+    );
+    
     // Immutables (for MasterContract and all clones)
     IBentoBoxV1 public immutable bentoBox;
     CauldronV4 public immutable masterContract;
@@ -129,6 +137,7 @@ contract CauldronV4 is BoringOwnable, IMasterContract {
     uint256 private constant EXCHANGE_RATE_PRECISION = 1e18;
 
     uint256 public LIQUIDATION_MULTIPLIER; 
+    uint256 public SAFE_LIQUIDATION_MULTIPLIER;
     uint256 private constant LIQUIDATION_MULTIPLIER_PRECISION = 1e5;
 
     uint256 public BORROW_OPENING_FEE;
@@ -138,7 +147,6 @@ contract CauldronV4 is BoringOwnable, IMasterContract {
     uint256 private constant DISTRIBUTION_PRECISION = 100;
 
     uint256 public MAX_SAFE_COLLATERIZATION_RATE;
-    uint256 public safeCollaterizationFeeBps;
 
     modifier onlyMasterContractOwner() {
         require(msg.sender == masterContract.owner(), "Caller is not the owner");
@@ -161,7 +169,39 @@ contract CauldronV4 is BoringOwnable, IMasterContract {
     /// @dev `data` is abi encoded in the format: (IERC20 collateral, IERC20 asset, IOracle oracle, bytes oracleData)
     function init(bytes calldata data) public payable override {
         require(address(collateral) == address(0), "Cauldron: already initialized");
-        (collateral, oracle, oracleData, accrueInfo.INTEREST_PER_SECOND, LIQUIDATION_MULTIPLIER, COLLATERIZATION_RATE, BORROW_OPENING_FEE, MAX_SAFE_COLLATERIZATION_RATE) = abi.decode(data, (IERC20, IOracle, bytes, uint64, uint256, uint256, uint256, uint256));
+        //(collateral, oracle, oracleData, accrueInfo.INTEREST_PER_SECOND, LIQUIDATION_MULTIPLIER, COLLATERIZATION_RATE, BORROW_OPENING_FEE, , ) = abi.decode(data, (IERC20, IOracle, bytes, uint64, uint256, uint256, uint256, uint256, uint256));
+
+        assembly {
+            collateral := mload(add(data, 32))
+            oracle := mload(add(data, 64))
+
+            // oracleData byte location
+            let oracleDataSrc := add(add(data, mload(add(data, 96))), 32)
+
+            INTEREST_PER_SECOND := mload(add(data, 128))
+            LIQUIDATION_MULTIPLIER := mload(add(data, 160))
+            COLLATERIZATION_RATE := mload(add(data, 192))
+            BORROW_OPENING_FEE := mload(add(data, 224))
+            SAFE_LIQUIDATION_MULTIPLIER := mload(add(data, 224))
+            SAFE_LIQUIDATION_MULTIPLIER := mload(add(data, 224))
+            MAX_SAFE_COLLATERIZATION_RATE := mload(add(data, 224))
+
+            // oracleData byte length
+            let oracleDataLen := mload(oracleDataSrc)
+            oracleDataSrc := add(oracleDataSrc, 32)
+
+            let oracleDataDest := oracleData
+            mstore(oracleDataDest, oracleDataLen) // store byte length
+            oracleDataDest := add(oracleData, 32)
+
+            // bytes data end rounded to 32 bytes
+            let end := add(oracleDataSrc, and(add(oracleDataLen, 31), not(31)))
+            for { } lt(oracleDataSrc, end) { oracleDataSrc := add(oracleDataSrc, 32) } {
+                mstore(oracleDataDest, mload(oracleDataSrc))
+                oracleDataDest := add(oracleDataDest, 32)
+            }
+        }
+
         borrowLimit = BorrowCap(type(uint128).max, type(uint128).max);
 
         require(address(collateral) != address(0), "Cauldron: bad pair");
@@ -570,7 +610,7 @@ contract CauldronV4 is BoringOwnable, IMasterContract {
     /// @param maxBorrowParts A one-to-one mapping to `users`, contains maximum (partial) borrow amounts (to liquidate) of the respective user.
     /// @param to Address of the receiver in open liquidations if `swapper` is zero.
     function liquidate(
-        address[] call users,
+        address[] memory users,
         uint256[] memory maxBorrowParts,
         address to,
         ISwapperV2 swapper,
@@ -709,14 +749,6 @@ contract CauldronV4 is BoringOwnable, IMasterContract {
     function setAllowedSupplyReducer(address account, bool allowed) public onlyMasterContractOwner {
         allowedSupplyReducers[account] = allowed;
         emit LogChangeAllowedSupplyReducer(account, allowed);
-    }
-
-    /// @notice changes fee given as an incentive to call user's safe
-    /// collaterization liquidation.
-    /// @param feeBps fee in bips
-    function changeBorrowLimit(uint256 feeBps) public onlyMasterContractOwner {
-        safeCollaterizationFeeBps = feeBps;
-        emit LogChangeSafeCollaterizationFee(feeBps);
     }
 
     /// @notice Used to auto repay everyone liabilities'.
