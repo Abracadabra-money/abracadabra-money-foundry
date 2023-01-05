@@ -5,10 +5,10 @@ import "utils/BaseScript.sol";
 
 contract MyScript is BaseScript {
     function run() public {
-        vm.startBroadcast();
+        startBroadcast();
 
         // Deployment here.
         
-        vm.stopBroadcast();
+        stopBroadcast();
     }
 }

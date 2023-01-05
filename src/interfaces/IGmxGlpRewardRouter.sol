@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0;
 
-interface IGmxRewardRouterV2 {
+interface IGmxGlpRewardRouter {
     event StakeGlp(address account, uint256 amount);
     event StakeGmx(address account, address token, uint256 amount);
     event UnstakeGlp(address account, uint256 amount);
@@ -13,10 +13,6 @@ interface IGmxRewardRouterV2 {
 
     function batchStakeGmxForAccount(address[] memory _accounts, uint256[] memory _amounts) external;
 
-    function bnGmx() external view returns (address);
-
-    function bonusGmxTracker() external view returns (address);
-
     function claim() external;
 
     function claimEsGmx() external;
@@ -27,21 +23,11 @@ interface IGmxRewardRouterV2 {
 
     function compoundForAccount(address _account) external;
 
-    function esGmx() external view returns (address);
-
     function feeGlpTracker() external view returns (address);
-
-    function feeGmxTracker() external view returns (address);
 
     function glp() external view returns (address);
 
     function glpManager() external view returns (address);
-
-    function glpVester() external view returns (address);
-
-    function gmx() external view returns (address);
-
-    function gmxVester() external view returns (address);
 
     function gov() external view returns (address);
 
@@ -72,6 +58,15 @@ interface IGmxRewardRouterV2 {
     ) external;
 
     function isInitialized() external view returns (bool);
+
+    function mintAndStakeGlp(
+        address _token,
+        uint256 _amount,
+        uint256 _minUsdg,
+        uint256 _minGlp
+    ) external returns (uint256);
+
+    function mintAndStakeGlpETH(uint256 _minUsdg, uint256 _minGlp) external payable returns (uint256);
 
     function pendingReceivers(address) external view returns (address);
 

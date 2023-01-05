@@ -4,7 +4,7 @@ pragma solidity >=0.8.0;
 import "interfaces/IERC20Vault.sol";
 import "interfaces/IAggregator.sol";
 
-contract ERC20VaultOracle is IAggregator {
+contract ERC20VaultAggregator is IAggregator {
     uint8 public immutable decimals;
     IERC20Vault public immutable vault;
 

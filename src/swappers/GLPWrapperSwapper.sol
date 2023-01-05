@@ -4,43 +4,41 @@ pragma solidity >=0.8.0;
 
 import "BoringSolidity/interfaces/IERC20.sol";
 import "BoringSolidity/libraries/BoringERC20.sol";
-import "interfaces/IUniswapV2Pair.sol";
 import "interfaces/IBentoBoxV1.sol";
 import "interfaces/ISwapperV2.sol";
-import "interfaces/IStargatePool.sol";
-import "interfaces/IStargateRouter.sol";
+import "interfaces/IGmxRewardRouterV2.sol";
+import "interfaces/ITokenWrapper.sol";
 
-/// @notice LP liquidation/deleverage swapper for Stargate LPs using Matcha/0x aggregator
-contract ZeroXStargateLPSwapper is ISwapperV2 {
+contract GLPWrapperSwapper is ISwapperV2 {
     using BoringERC20 for IERC20;
 
     error ErrSwapFailed();
 
     IBentoBoxV1 public immutable bentoBox;
-    IStargatePool public immutable pool;
+    IERC20 public immutable token;
     IERC20 public immutable mim;
-    IERC20 public immutable underlyingToken;
-    IStargateRouter public immutable stargateRouter;
+    IERC20 public immutable usdc;
+    IERC20 public immutable sGLP;
+    IGmxRewardRouterV2 public immutable rewardRouter;
     address public immutable zeroXExchangeProxy;
-    uint16 public immutable poolId;
 
     constructor(
         IBentoBoxV1 _bentoBox,
-        IStargatePool _pool,
-        uint16 _poolId,
-        IStargateRouter _stargateRouter,
+        IERC20 _token,
         IERC20 _mim,
+        IERC20 _sGLP,
+        IERC20 _usdc,
+        IGmxRewardRouterV2 _rewardRouter,
         address _zeroXExchangeProxy
     ) {
         bentoBox = _bentoBox;
-        pool = _pool;
-        poolId = _poolId;
+        token = _token;
         mim = _mim;
-        stargateRouter = _stargateRouter;
+        usdc = _usdc;
+        sGLP = _sGLP;
+        rewardRouter = _rewardRouter;
         zeroXExchangeProxy = _zeroXExchangeProxy;
-        underlyingToken = IERC20(_pool.token());
-
-        underlyingToken.approve(_zeroXExchangeProxy, type(uint256).max);
+        usdc.approve(_zeroXExchangeProxy, type(uint256).max);
         mim.approve(address(_bentoBox), type(uint256).max);
     }
 
@@ -53,20 +51,19 @@ contract ZeroXStargateLPSwapper is ISwapperV2 {
         uint256 shareFrom,
         bytes calldata swapData
     ) public override returns (uint256 extraShare, uint256 shareReturned) {
-        bentoBox.withdraw(IERC20(address(pool)), address(this), address(this), 0, shareFrom);
+        (uint256 amount, ) = bentoBox.withdraw(IERC20(address(token)), address(this), address(this), 0, shareFrom);
+        ITokenWrapper(address(token)).unwrap(amount);
 
-        // use the full balance so it's easier to check if everything has been redeemed.
-        uint256 amount = IERC20(address(pool)).balanceOf(address(this));
+        rewardRouter.unstakeAndRedeemGlp(address(usdc), amount, 0, address(this));
 
-        // Stargate Pool LP -> Underlying Token
-        stargateRouter.instantRedeemLocal(poolId, amount, address(this));
-        require(IERC20(address(pool)).balanceOf(address(this)) == 0, "Cannot fully redeem");
-
-        // underlying -> MIM
+        // token -> MIM
         (bool success, ) = zeroXExchangeProxy.call(swapData);
         if (!success) {
             revert ErrSwapFailed();
         }
+
+        // we can expect dust from both gmx and 0x
+        usdc.safeTransfer(recipient, usdc.balanceOf(address(this)));
 
         (, shareReturned) = bentoBox.deposit(mim, address(this), recipient, mim.balanceOf(address(this)), 0);
         extraShare = shareReturned - shareToMin;

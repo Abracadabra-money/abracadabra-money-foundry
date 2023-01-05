@@ -42,21 +42,6 @@ archive-all:
 check-git-clean:
 	@git diff --quiet || ( echo "This command requires clean working and staging areas, including no untracked files." && exit 1 )
 
-test-archive-no-git-check:
-	-@mkdir -p ./cache/backup 2>/dev/null ||:
-	-@mv $(SCRIPT_DIR)/*.s.sol ./cache/backup 2>/dev/null ||:
-	-@mv $(TEST_DIR)/*.t.sol ./cache/backup 2>/dev/null ||:
-	-@cp $(ARCHIVE_SCRIPT_FILES) $(SCRIPT_DIR) 2>/dev/null ||:
-	-@cp $(ARCHIVE_TEST_FILES) $(TEST_DIR) 2>/dev/null ||:
-	-@forge test -vv ||:
-	-@rm $(SCRIPT_DIR)/*.s.sol $(TEST_DIR)/*.t.sol 2>/dev/null ||:
-	-@mv ./cache/backup/*.s.sol $(SCRIPT_DIR) 2>/dev/null ||:
-	-@mv ./cache/backup/*.t.sol $(TEST_DIR) 2>/dev/null ||:
-
-test-archive: check-git-clean test-archive-no-git-check
-test-archives: test-archive
-test-archives-no-git-check: test-archive-no-git-check
-
 deploy-simulation: check-console-log
 ifndef SCRIPT
 	$(foreach file, $(wildcard $(SCRIPT_DIR)/*.s.sol), \

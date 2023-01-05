@@ -215,12 +215,15 @@ contract Constants {
         setAddress("arbitrum.gmx.fGlpWethRewardDistributor", 0x5C04a12EB54A093c396f61355c6dA0B15890150d);
         setAddress("arbitrum.gmx.esGmxRewardDistributor", 0x60519b48ec4183a61ca2B8e37869E675FD203b34);
         setAddress("arbitrum.gmx.glpManager", 0x3963FfC9dff443c2A94f21b129D429891E32ec18);
-        setAddress("arbitrum.gmx.rewardRouterV2", 0xB95DB5B167D75e6d04227CfFFA61069348d271F5);
+        setAddress("arbitrum.gmx.rewardRouterV2", 0xA906F338CB21815cBc4Bc87ace9e68c87eF8d8F1);
+        setAddress("arbitrum.gmx.glpRewardRouter", 0xB95DB5B167D75e6d04227CfFFA61069348d271F5);
         setAddress("arbitrum.safe.main", 0xf46BB6dDA9709C49EfB918201D97F6474EAc5Aea);
         setAddress("arbitrum.safe.ops", 0xA71A021EF66B03E45E0d85590432DFCfa1b7174C);
         setAddress("arbitrum.safe.devOps", 0x8C56F240a3846284Dcf4cae01eE9212F11695E17);
         setAddress("arbitrum.safe.devOps.gelatoProxy", 0xbf75D47d8737344fD20cC35973637b1553Ce098E);
         setAddress("arbitrum.aggregators.zeroXExchangProxy", 0xDef1C0ded9bec7F1a1670819833240f027b25EfF);
+        setAddress("arbitrum.devOps", 0x8C56F240a3846284Dcf4cae01eE9212F11695E17);
+        setAddress("arbitrum.devOps.gelatoProxy", 0xbf75D47d8737344fD20cC35973637b1553Ce098E);
         setAddress("arbitrum.mimCauldronDistributor", 0xC4E343b89fB261f42432D9078Dde9798e67c33BA);
 
         // v2

@@ -210,7 +210,7 @@ contract MimCauldronDistributor is Operatable {
         emit LogPaused(paused, _paused);
         paused = _paused;
     }
-
+    
     function setFeeParameters(address _feeCollector, uint88 _interest) external onlyOwner {
         feeCollector = _feeCollector;
         interest = _interest;

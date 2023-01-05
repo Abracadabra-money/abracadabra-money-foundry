@@ -51,7 +51,7 @@ contract SolidlyLpWrapperTest is BaseTest {
 
         underlyingLpOracle = UniswapLikeLPOracle(
             address(
-                ERC20VaultOracle(address(InverseOracle(address(ProxyOracle(address(oracle)).oracleImplementation())).oracle()))
+                ERC20VaultAggregator(address(InverseOracle(address(ProxyOracle(address(oracle)).oracleImplementation())).oracle()))
                     .underlyingOracle()
             )
         );

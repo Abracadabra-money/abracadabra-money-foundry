@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "swappers/ZeroXUniswapLikeLPLevSwapper.sol";
-import "swappers/ZeroXUniswapLikeLPSwapper.sol";
+import "swappers/UniswapLikeLPLevSwapper.sol";
+import "swappers/UniswapLikeLPSwapper.sol";
 import "oracles/ProxyOracle.sol";
 import "oracles/TokenOracle.sol";
 import "oracles/UniswapLikeLPOracle.sol";
@@ -21,9 +21,9 @@ library UniswapLikeLib {
         IERC20 mim,
         address zeroXExchangeProxy
     ) internal returns (ISwapperV2 swapper, ILevSwapperV2 levSwapper) {
-        swapper = ISwapperV2(address(new ZeroXUniswapLikeLPSwapper(degenBox, collateral, mim, zeroXExchangeProxy)));
+        swapper = ISwapperV2(address(new UniswapLikeLPSwapper(degenBox, collateral, mim, zeroXExchangeProxy)));
         levSwapper = ILevSwapperV2(
-            address(new ZeroXUniswapLikeLPLevSwapper(degenBox, uniswapLikeRouter, collateral, mim, zeroXExchangeProxy))
+            address(new UniswapLikeLPLevSwapper(degenBox, uniswapLikeRouter, collateral, mim, zeroXExchangeProxy))
         );
     }
 

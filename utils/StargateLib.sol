@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "swappers/ZeroXStargateLPSwapper.sol";
-import "swappers/ZeroXStargateLPLevSwapper.sol";
+import "swappers/StargateLPSwapper.sol";
+import "swappers/StargateLPLevSwapper.sol";
 import "oracles/ProxyOracle.sol";
 import "oracles/StargateLPOracle.sol";
 import "strategies/StargateLPStrategy.sol";
@@ -52,7 +52,7 @@ library StargateLib  {
     ) internal returns (ISwapperV2 swapper, ILevSwapperV2 levSwapper) {
         swapper = ISwapperV2(
             address(
-                new ZeroXStargateLPSwapper(
+                new StargateLPSwapper(
                     degenBox,
                     pool,
                     poolId,
@@ -64,7 +64,7 @@ library StargateLib  {
         );
         levSwapper = ILevSwapperV2(
             address(
-                new ZeroXStargateLPLevSwapper(
+                new StargateLPLevSwapper(
                     IBentoBoxV1(degenBox),
                     IStargatePool(pool),
                     poolId,

@@ -11,7 +11,7 @@ import "interfaces/IStargatePool.sol";
 import "interfaces/IStargateRouter.sol";
 
 /// @notice LP leverage swapper for Stargate LP using Matcha/0x aggregator
-contract ZeroXStargateLPLevSwapper is ILevSwapperV2 {
+contract StargateLPLevSwapper is ILevSwapperV2 {
     using BoringERC20 for IERC20;
 
     error ErrSwapFailed();

@@ -12,8 +12,8 @@ import "periphery/GmxGlpRewardHandler.sol";
 import "periphery/MimCauldronDistributor.sol";
 import "periphery/DegenBoxTokenWrapper.sol";
 import "periphery/GlpWrapperHarvestor.sol";
-import "swappers/ZeroXGLPWrapperSwapper.sol";
-import "swappers/ZeroXGLPWrapperLevSwapper.sol";
+import "swappers/GLPWrapperSwapper.sol";
+import "swappers/GLPWrapperLevSwapper.sol";
 
 contract GlpWrapperSwappersScript is BaseScript {
     function run() public returns (GmxGlpWrapper wrapper) {
@@ -28,7 +28,7 @@ contract GlpWrapperSwappersScript is BaseScript {
 
             vm.startBroadcast();
             wrapper = GmxGlpWrapper(constants.getAddress("arbitrum.abracadabraWrappedStakedGlp"));
-            new ZeroXGLPWrapperSwapper(
+            new GLPWrapperSwapper(
                 IBentoBoxV1(degenBox),
                 wrapper,
                 IERC20(mim),
@@ -37,7 +37,7 @@ contract GlpWrapperSwappersScript is BaseScript {
                 IGmxRewardRouterV2(rewardRouterV2),
                 swapper
             );
-            new ZeroXGLPWrapperLevSwapper(
+            new GLPWrapperLevSwapper(
                 IBentoBoxV1(degenBox),
                 wrapper,
                 IERC20(mim),

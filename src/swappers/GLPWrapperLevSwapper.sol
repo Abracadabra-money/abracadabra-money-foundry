@@ -7,10 +7,9 @@ import "BoringSolidity/libraries/BoringERC20.sol";
 import "interfaces/IBentoBoxV1.sol";
 import "interfaces/ILevSwapperV2.sol";
 import "interfaces/ITokenWrapper.sol";
-import "interfaces/IGmxRewardRouterV2.sol";
+import "interfaces/IGmxGlpRewardRouter.sol";
 
-/// @notice LP leverage swapper for tokens using Matcha/0x aggregator
-contract ZeroXGLPWrapperLevSwapper is ILevSwapperV2 {
+contract GLPWrapperLevSwapper is ILevSwapperV2 {
     using BoringERC20 for IERC20;
 
     error ErrSwapFailed();
@@ -19,7 +18,7 @@ contract ZeroXGLPWrapperLevSwapper is ILevSwapperV2 {
     IERC20 public immutable mim;
     IERC20 public immutable token;
     IERC20 public immutable usdc;
-    IGmxRewardRouterV2 public immutable rewardRouter;
+    IGmxGlpRewardRouter public immutable rewardRouter;
     IERC20 public immutable sGLP;
     address public immutable zeroXExchangeProxy;
 
@@ -30,7 +29,7 @@ contract ZeroXGLPWrapperLevSwapper is ILevSwapperV2 {
         IERC20 _sGLP,
         IERC20 _usdc,
         address glpManager,
-        IGmxRewardRouterV2 _rewardRouter,
+        IGmxGlpRewardRouter _rewardRouter,
         address _zeroXExchangeProxy
     ) {
         bentoBox = _bentoBox;

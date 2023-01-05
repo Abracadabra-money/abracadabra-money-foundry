@@ -6,8 +6,8 @@ import "utils/BaseScript.sol";
 import "utils/CauldronLib.sol";
 import "oracles/ProxyOracle.sol";
 import "oracles/InverseOracle.sol";
-import "swappers/ZeroXTokenSwapper.sol";
-import "swappers/ZeroXTokenLevSwapper.sol";
+import "swappers/TokenSwapper.sol";
+import "swappers/TokenLevSwapper.sol";
 import "strategies/LiquityStabilityPoolStrategy.sol";
 
 contract LiquityScript is BaseScript {
@@ -41,14 +41,14 @@ contract LiquityScript is BaseScript {
             100 // 1% liquidation
         );
 
-        swapper = new ZeroXTokenSwapper(
+        swapper = new TokenSwapper(
             IBentoBoxV1(constants.getAddress("mainnet.degenBox")),
             IERC20(constants.getAddress("mainnet.liquity.lusd")),
             IERC20(constants.getAddress("mainnet.mim")),
             constants.getAddress("mainnet.aggregators.zeroXExchangProxy")
         );
 
-        levSwapper = new ZeroXTokenLevSwapper(
+        levSwapper = new TokenLevSwapper(
             IBentoBoxV1(constants.getAddress("mainnet.degenBox")),
             IERC20(constants.getAddress("mainnet.liquity.lusd")),
             IERC20(constants.getAddress("mainnet.mim")),

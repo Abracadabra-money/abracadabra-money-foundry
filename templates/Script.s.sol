@@ -8,7 +8,7 @@ contract MyScript is BaseScript {
     function run() public returns (ProxyOracle oracle) {
         address xMerlin = constants.getAddress("xMerlin");
 
-        vm.startBroadcast();
+        startBroadcast();
 
         // Dummy deployment example
         oracle = UniswapLikeLib.deployLPOracle(
@@ -23,6 +23,6 @@ contract MyScript is BaseScript {
             oracle.transferOwnership(xMerlin, true, false);
         }
 
-        vm.stopBroadcast();
+        stopBroadcast();
     }
 }
