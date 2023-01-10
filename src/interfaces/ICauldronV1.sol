@@ -13,4 +13,6 @@ interface ICauldronV1 {
     function feeTo() external returns (address);
 
     function masterContract() external returns (ICauldronV1);
+
+    function bentoBox() external view returns (address);
 }
